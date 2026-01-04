@@ -37,7 +37,6 @@
           </div>
         </div>
 
-
         <div class="details">
           <div class="detail">
             <div class="k">Date</div>
@@ -49,17 +48,19 @@
           </div>
           <div class="detail">
             <div class="k">Venue</div>
-              <div class="v">
-                The Saujana Hotel, KL<br>
-                <a class="mapLink" id="mapLink" href="https://maps.google.com/?q=The+Saujana+Hotel+Kuala+Lumpur" target="_blank" rel="noopener">
+            <div class="v">
+              The Saujana Hotel, KL<br>
+              <a class="mapLink" id="mapLink"
+                 href="https://maps.google.com/?q=The+Saujana+Hotel+Kuala+Lumpur"
+                 target="_blank" rel="noopener">
                 Open in Google Maps
               </a>
-              </div>
+            </div>
           </div>
         </div>
 
         <p class="note">
-          Color code: <b>Pastel color EXCLUDING Pink & White</b>. Please RSVP by <b>1 March 2026</b>.
+          Color code: <b>Pastel color EXCLUDING Pink &amp; White</b>. Please RSVP by <b>1 March 2026</b>.
         </p>
       </header>
 
@@ -67,15 +68,11 @@
         <h2 class="h2">RSVP</h2>
         <p class="sub">A quick tap helps us plan seating and food.</p>
 
-        <form id="rsvpForm" name="rsvp" method="POST" data-netlify="true" netlify-honeypot="bot-field">
-          <input type="hidden" name="form-name" value="rsvp" />
+        <!-- PATCH: removed Netlify attributes and hidden netlify fields -->
+        <form id="rsvpForm">
           <input type="hidden" name="guest_name" id="guestNameField" />
           <input type="hidden" name="response" id="responseField" />
           <input type="hidden" name="pax" id="paxField" />
-
-          <p class="hidden">
-            <label>Don’t fill this out: <input name="bot-field" /></label>
-          </p>
 
           <div class="choiceRow">
             <button type="button" class="btn" id="yesBtn">Yes, joyfully</button>
