@@ -179,6 +179,18 @@ body{
 }
 .k{ color: var(--muted); font-size: 12px; letter-spacing:.06em; text-transform: uppercase; }
 .v{ font-weight: 500; color: var(--text); text-align:right; }
+.mapLink{
+  display:inline-block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: rgba(255,255,255,.80);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(255,255,255,.35);
+}
+.mapLink:hover{
+  color: rgba(255,255,255,.95);
+  border-bottom-color: rgba(255,255,255,.55);
+}
 
 .note{
   margin: 14px 2px 0;
