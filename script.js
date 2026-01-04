@@ -1,24 +1,17 @@
 (function () {
-  /* ========= CONFIG =========
-     Edit these if you want JS to control the banner names.
-     If you prefer editing in HTML only, set these to "" and the script will not overwrite.
-  */
-  const coupleA = "Novin";
-  const coupleB = "Hui Ting";
+
+  /* ========= CONFIG ========= */
+  const SCRIPT_URL = "PASTE_YOUR_GOOGLE_SCRIPT_URL_HERE";
 
   /* ========= HELPERS ========= */
   const $ = (id) => document.getElementById(id);
-  const setText = (id, value) => {
-    const el = $(id);
-    if (el) el.textContent = value;
-  };
 
-  /* ========= URL PARAMS ========= */
+  /* ========= URL PARAM ========= */
   const params = new URLSearchParams(window.location.search);
   const guestName = (params.get("name") || "").trim();
   const safeName = guestName || "Dear Guest";
 
-  /* ========= ELEMENTS (MATCH YOUR HTML) ========= */
+  /* ========= ELEMENTS ========= */
   const guestNameEl = $("guestName");
   const guestNameField = $("guestNameField");
   const responseField = $("responseField");
@@ -35,36 +28,13 @@
 
   const paxChips = document.querySelectorAll(".chip");
 
-  /* ========= INIT TEXT ========= */
+  /* ========= INIT ========= */
   if (guestNameEl) guestNameEl.textContent = safeName;
   if (guestNameField) guestNameField.value = safeName;
 
-  // Only overwrite banner names if config values are non-empty
-  if (coupleA) setText("coupleA", coupleA);
-  if (coupleB) setText("coupleB", coupleB);
-
-  /* ========= REQUIRED ELEMENTS CHECK ========= */
-  const required = [
-    ["rsvpForm", form],
-    ["yesBtn", yesBtn],
-    ["noBtn", noBtn],
-    ["submitBtn", submitBtn],
-    ["responseField", responseField],
-    ["paxField", paxField],
-    ["guestNameField", guestNameField],
-  ];
-
-  const missing = required.filter(([_, el]) => !el).map(([name]) => name);
-  if (missing.length) {
-    console.error("Missing required elements:", missing.join(", "));
-    if (status) status.textContent = "Page error: missing form elements.";
-    return;
-  }
-
-  /* ========= STATE HELPERS ========= */
   function clearPax() {
     paxField.value = "";
-    paxChips.forEach((c) => c.classList.remove("selected"));
+    paxChips.forEach(c => c.classList.remove("selected"));
   }
 
   function setHint(text) {
@@ -72,88 +42,87 @@
   }
 
   function setResponse(val) {
-    if (status) status.textContent = "";
     responseField.value = val;
-
     yesBtn.classList.toggle("selected", val === "YES");
     noBtn.classList.toggle("selected", val === "NO");
 
     if (val === "YES") {
-      if (paxRow) paxRow.classList.add("show");
+      paxRow.classList.add("show");
       submitBtn.disabled = !paxField.value;
       setHint(submitBtn.disabled ? "Select number of pax." : "Ready to submit.");
     } else {
-      if (paxRow) paxRow.classList.remove("show");
+      paxRow.classList.remove("show");
       clearPax();
       submitBtn.disabled = false;
       setHint("Ready to submit.");
     }
   }
 
-  /* ========= BINDINGS ========= */
-  yesBtn.addEventListener("click", () => setResponse("YES"));
-  noBtn.addEventListener("click", () => setResponse("NO"));
+  yesBtn.onclick = () => setResponse("YES");
+  noBtn.onclick = () => setResponse("NO");
 
-  paxChips.forEach((chip) => {
-    chip.addEventListener("click", () => {
-      // If user taps pax first, auto-switch to YES (better UX)
+  paxChips.forEach(chip => {
+    chip.onclick = () => {
       if (responseField.value !== "YES") setResponse("YES");
-
-      paxChips.forEach((c) => c.classList.remove("selected"));
+      paxChips.forEach(c => c.classList.remove("selected"));
       chip.classList.add("selected");
-      paxField.value = chip.dataset.pax || "";
-
+      paxField.value = chip.dataset.pax;
       submitBtn.disabled = false;
       setHint("Ready to submit.");
-    });
+    };
   });
 
-  // Initial UI state
   submitBtn.disabled = true;
   setHint("Choose Yes or No first.");
 
-  /* ========= SUBMIT (Netlify-friendly AJAX) ========= */
+  /* ========= SUBMIT ========= */
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     if (!responseField.value) {
-      if (status) status.textContent = "Please choose Yes or No.";
+      status.textContent = "Please choose Yes or No.";
       return;
     }
     if (responseField.value === "YES" && !paxField.value) {
-      if (status) status.textContent = "Please select number of pax.";
+      status.textContent = "Please select number of pax.";
       return;
     }
 
     submitBtn.disabled = true;
-    if (status) status.textContent = "Submitting…";
+    status.textContent = "Submitting…";
+
+    const payload = {
+      guest_name: guestNameField.value,
+      response: responseField.value,
+      pax: paxField.value,
+      message: messageEl.value
+    };
 
     try {
-      const body = new URLSearchParams(new FormData(form)).toString();
-
-      const res = await fetch(form.getAttribute("action") || "/", {
+      const res = await fetch(SCRIPT_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body
+        body: JSON.stringify(payload),
+        headers: { "Content-Type": "application/json" }
       });
 
-      if (res.ok) {
-        if (status) status.textContent = "Thank you! RSVP received 🥂";
+      const json = await res.json();
+
+      if (json.success) {
+        status.textContent = "Thank you! RSVP received 🥂";
         setHint("You may close this page.");
 
-        // Lock UI
         yesBtn.disabled = true;
         noBtn.disabled = true;
-        paxChips.forEach((c) => (c.disabled = true));
-        if (messageEl) messageEl.disabled = true;
+        paxChips.forEach(c => c.disabled = true);
+        messageEl.disabled = true;
       } else {
-        if (status) status.textContent = `Submission failed (HTTP ${res.status}).`;
+        status.textContent = "Submission failed. Please try again.";
         submitBtn.disabled = false;
       }
     } catch (err) {
-      console.error(err);
-      if (status) status.textContent = "Network error. Please try again.";
+      status.textContent = "Network error. Please try again.";
       submitBtn.disabled = false;
     }
   });
+
 })();
