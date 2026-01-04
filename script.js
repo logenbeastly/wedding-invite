@@ -1,63 +1,78 @@
 (function () {
+
+  /* ========= CONFIG ========= */
+  const coupleA = "Logen";
+  const coupleB = "Partner";
+
+  /* ========= URL PARAMS ========= */
   const params = new URLSearchParams(window.location.search);
-
   const guestName = (params.get("name") || "").trim();
-  const safeName = guestName.length ? guestName : "Dear Guest";
+  const safeName = guestName || "Dear Guest";
 
+  /* ========= ELEMENTS ========= */
   const guestNameEl = document.getElementById("guestName");
   const guestNameField = document.getElementById("guestNameField");
   const responseField = document.getElementById("responseField");
+  const paxField = document.getElementById("paxField");
 
   const yesBtn = document.getElementById("yesBtn");
   const noBtn = document.getElementById("noBtn");
   const paxRow = document.getElementById("paxRow");
-  const paxSel = document.getElementById("pax");
+  const paxChips = document.querySelectorAll(".chip");
+
   const submitBtn = document.getElementById("submitBtn");
   const hint = document.getElementById("hint");
   const status = document.getElementById("status");
   const form = document.getElementById("rsvpForm");
   const messageEl = document.getElementById("message");
 
+  /* ========= INIT ========= */
   guestNameEl.textContent = safeName;
   guestNameField.value = safeName;
 
-  function setSelected(which) {
-    status.textContent = "";
-    yesBtn.classList.toggle("selected", which === "YES");
-    noBtn.classList.toggle("selected", which === "NO");
+  document.getElementById("coupleA").textContent = coupleA;
+  document.getElementById("coupleB").textContent = coupleB;
+  document.getElementById("nameA").textContent = coupleA;
+  document.getElementById("nameB").textContent = coupleB;
 
-    responseField.value = which;
+  function clearPax() {
+    paxField.value = "";
+    paxChips.forEach(c => c.classList.remove("selected"));
+  }
 
-    if (which === "YES") {
+  function setResponse(val) {
+    responseField.value = val;
+    yesBtn.classList.toggle("selected", val === "YES");
+    noBtn.classList.toggle("selected", val === "NO");
+
+    if (val === "YES") {
       paxRow.classList.add("show");
-      paxRow.setAttribute("aria-hidden", "false");
-      paxSel.disabled = false;
-
-      // Require pax before enabling submit
-      submitBtn.disabled = (paxSel.value === "");
-      hint.textContent = submitBtn.disabled ? "Select pax to continue." : "Ready to submit.";
+      submitBtn.disabled = !paxField.value;
+      hint.textContent = submitBtn.disabled
+        ? "Select number of pax."
+        : "Ready to submit.";
     } else {
       paxRow.classList.remove("show");
-      paxRow.setAttribute("aria-hidden", "true");
-      paxSel.disabled = true;
-      paxSel.value = "";
-
+      clearPax();
       submitBtn.disabled = false;
       hint.textContent = "Ready to submit.";
     }
   }
 
-  yesBtn.addEventListener("click", () => setSelected("YES"));
-  noBtn.addEventListener("click", () => setSelected("NO"));
+  yesBtn.onclick = () => setResponse("YES");
+  noBtn.onclick = () => setResponse("NO");
 
-  paxSel.addEventListener("change", () => {
-    if (responseField.value === "YES") {
-      submitBtn.disabled = (paxSel.value === "");
-      hint.textContent = submitBtn.disabled ? "Select pax to continue." : "Ready to submit.";
-    }
+  paxChips.forEach(chip => {
+    chip.onclick = () => {
+      paxChips.forEach(c => c.classList.remove("selected"));
+      chip.classList.add("selected");
+      paxField.value = chip.dataset.pax;
+      submitBtn.disabled = false;
+      hint.textContent = "Ready to submit.";
+    };
   });
 
-  // Netlify-friendly AJAX submit (x-www-form-urlencoded)
+  /* ========= SUBMIT ========= */
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -65,7 +80,7 @@
       status.textContent = "Please choose Yes or No.";
       return;
     }
-    if (responseField.value === "YES" && !paxSel.value) {
+    if (responseField.value === "YES" && !paxField.value) {
       status.textContent = "Please select number of pax.";
       return;
     }
@@ -74,10 +89,9 @@
     status.textContent = "Submitting…";
 
     try {
-      const formData = new FormData(form);
-      const body = new URLSearchParams(formData).toString();
+      const body = new URLSearchParams(new FormData(form)).toString();
 
-      const res = await fetch(form.getAttribute("action") || "/", {
+      const res = await fetch("/", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body
@@ -85,21 +99,20 @@
 
       if (res.ok) {
         status.textContent = "Thank you! RSVP received 🥂";
-        hint.textContent = "You can close this page now.";
+        hint.textContent = "You may close this page.";
 
-        // Lock the UI
         yesBtn.disabled = true;
         noBtn.disabled = true;
-        paxSel.disabled = true;
-        submitBtn.disabled = true;
+        paxChips.forEach(c => c.disabled = true);
         if (messageEl) messageEl.disabled = true;
       } else {
-        status.textContent = `Submit failed (HTTP ${res.status}). Please try again.`;
+        status.textContent = `Submission failed (HTTP ${res.status}).`;
         submitBtn.disabled = false;
       }
-    } catch (err) {
+    } catch {
       status.textContent = "Network error. Please try again.";
       submitBtn.disabled = false;
     }
   });
+
 })();
