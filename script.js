@@ -1,8 +1,8 @@
 (function () {
 
   /* ========= CONFIG ========= */
-  const coupleA = "Logen";
-  const coupleB = "Partner";
+  const coupleA = "Novin";
+  const coupleB = "Hui Ting";
 
   /* ========= URL PARAMS ========= */
   const params = new URLSearchParams(window.location.search);
