@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Wedding Invitation</title>
+  <meta name="description" content="Wedding invitation and RSVP" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+  <main class="wrap">
+    <section class="card">
+      <header class="hero">
+        <div class="pill">You're invited</div>
+        <h1 class="title">
+          <span id="guestName">Dear Guest</span>,
+          <span class="soft">we’d love to celebrate with you</span>
+        </h1>
+
+        <div class="names">
+          <div class="big">Logen</div>
+          <div class="amp">&</div>
+          <div class="big">Partner</div>
+        </div>
+
+        <div class="details">
+          <div class="detail">
+            <div class="k">Date</div>
+            <div class="v" id="eventDate">Saturday, 20 July 2026</div>
+          </div>
+          <div class="detail">
+            <div class="k">Time</div>
+            <div class="v" id="eventTime">6:30 PM</div>
+          </div>
+          <div class="detail">
+            <div class="k">Venue</div>
+            <div class="v" id="eventVenue">The Majestic Ballroom, KL</div>
+          </div>
+        </div>
+
+        <p class="note" id="eventNote">
+          Dress code: <b>Elegant</b>. Please RSVP by <b>1 July 2026</b>.
+        </p>
+      </header>
+
+      <section class="rsvp">
+        <h2 class="h2">RSVP</h2>
+        <p class="sub">A quick tap helps us plan seating and food.</p>
+
+        <!-- Netlify Forms -->
+        <form id="rsvpForm" name="rsvp" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+          <input type="hidden" name="form-name" value="rsvp" />
+          <p class="hidden">
+            <label>Don’t fill this out: <input name="bot-field" /></label>
+          </p>
+
+          <input type="hidden" name="guest_name" id="guestNameField" value="" />
+          <input type="hidden" name="response" id="responseField" value="" />
+
+          <div class="choiceRow" role="group" aria-label="RSVP response">
+            <button type="button" class="btn yes" id="yesBtn">Yes, joyfully</button>
+            <button type="button" class="btn no" id="noBtn">No, with love</button>
+          </div>
+
+          <div class="paxRow" id="paxRow" aria-hidden="true">
+            <label class="label" for="pax">Number of pax</label>
+            <select name="pax" id="pax" class="select" disabled>
+              <option value="" selected>Select</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+            </select>
+          </div>
+
+          <div class="msgRow">
+            <label class="label" for="message">Message (optional)</label>
+            <textarea name="message" id="message" class="textarea" rows="3"
+              placeholder="Any notes for us?"></textarea>
+          </div>
+
+          <div class="actions">
+            <button type="submit" class="btn primary" id="submitBtn" disabled>Submit RSVP</button>
+            <div class="tiny" id="hint">Choose Yes or No first.</div>
+          </div>
+
+          <div class="status" id="status" aria-live="polite"></div>
+        </form>
+      </section>
+
+      <footer class="footer">
+        <div class="tiny">Tip: share personalized links like <code>?name=Daniel%20Tan</code></div>
+      </footer>
+    </section>
+  </main>
+
+  <script src="./script.js"></script>
+</body>
+</html>
