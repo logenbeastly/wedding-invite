@@ -16,6 +16,7 @@
   const hint = document.getElementById("hint");
   const status = document.getElementById("status");
   const form = document.getElementById("rsvpForm");
+  const messageEl = document.getElementById("message");
 
   guestNameEl.textContent = safeName;
   guestNameField.value = safeName;
@@ -56,7 +57,7 @@
     }
   });
 
-  // AJAX submit so the page doesn't navigate away
+  // Netlify-friendly AJAX submit (x-www-form-urlencoded)
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -74,17 +75,26 @@
 
     try {
       const formData = new FormData(form);
-      const res = await fetch("/", { method: "POST", body: formData });
+      const body = new URLSearchParams(formData).toString();
+
+      const res = await fetch(form.getAttribute("action") || "/", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body
+      });
 
       if (res.ok) {
         status.textContent = "Thank you! RSVP received 🥂";
         hint.textContent = "You can close this page now.";
+
+        // Lock the UI
         yesBtn.disabled = true;
         noBtn.disabled = true;
         paxSel.disabled = true;
-        form.querySelector("#message").disabled = true;
+        submitBtn.disabled = true;
+        if (messageEl) messageEl.disabled = true;
       } else {
-        status.textContent = "Something went wrong. Please try again.";
+        status.textContent = `Submit failed (HTTP ${res.status}). Please try again.`;
         submitBtn.disabled = false;
       }
     } catch (err) {
