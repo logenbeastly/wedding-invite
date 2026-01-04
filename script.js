@@ -2,6 +2,7 @@
 
   /* ========= CONFIG ========= */
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzLxkehFz79asOtvTecgQYWrnwn6t8gU9I7T3QniU1GqmV1RJ216x8fH_rwm19-pPZyMw/exec";
+  // MUST end with /exec
 
   /* ========= HELPERS ========= */
   const $ = (id) => document.getElementById(id);
@@ -43,6 +44,7 @@
 
   function setResponse(val) {
     responseField.value = val;
+
     yesBtn.classList.toggle("selected", val === "YES");
     noBtn.classList.toggle("selected", val === "NO");
 
@@ -58,18 +60,20 @@
     }
   }
 
-  yesBtn.onclick = () => setResponse("YES");
-  noBtn.onclick = () => setResponse("NO");
+  yesBtn.addEventListener("click", () => setResponse("YES"));
+  noBtn.addEventListener("click", () => setResponse("NO"));
 
   paxChips.forEach(chip => {
-    chip.onclick = () => {
+    chip.addEventListener("click", () => {
       if (responseField.value !== "YES") setResponse("YES");
+
       paxChips.forEach(c => c.classList.remove("selected"));
       chip.classList.add("selected");
       paxField.value = chip.dataset.pax;
+
       submitBtn.disabled = false;
       setHint("Ready to submit.");
-    };
+    });
   });
 
   submitBtn.disabled = true;
@@ -79,10 +83,13 @@
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
+    status.textContent = "";
+
     if (!responseField.value) {
       status.textContent = "Please choose Yes or No.";
       return;
     }
+
     if (responseField.value === "YES" && !paxField.value) {
       status.textContent = "Please select number of pax.";
       return;
@@ -101,11 +108,24 @@
     try {
       const res = await fetch(SCRIPT_URL, {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify(payload),
-        headers: { "Content-Type": "application/json" }
+        redirect: "follow"
       });
 
-      const json = await res.json();
+      const text = await res.text();
+
+      let json;
+      try {
+        json = JSON.parse(text);
+      } catch {
+        throw new Error(
+          "Server did not return JSON. Response was:\n" +
+          text.slice(0, 150)
+        );
+      }
 
       if (json.success) {
         status.textContent = "Thank you! RSVP received 🥂";
@@ -116,11 +136,14 @@
         paxChips.forEach(c => c.disabled = true);
         messageEl.disabled = true;
       } else {
-        status.textContent = "Submission failed. Please try again.";
+        status.textContent = "Submission failed: " + (json.error || "Unknown error");
         submitBtn.disabled = false;
       }
+
     } catch (err) {
-      status.textContent = "Network error. Please try again.";
+      console.error(err);
+      status.textContent =
+        "Unable to submit RSVP. Please check connection or try again later.";
       submitBtn.disabled = false;
     }
   });
