@@ -1,0 +1,204 @@
+:root{
+  --bg: #0b0c10;
+  --card: rgba(255,255,255,.06);
+  --card2: rgba(255,255,255,.08);
+  --text: rgba(255,255,255,.92);
+  --muted: rgba(255,255,255,.68);
+  --faint: rgba(255,255,255,.45);
+  --stroke: rgba(255,255,255,.12);
+  --radius: 22px;
+  --shadow: 0 18px 55px rgba(0,0,0,.45);
+}
+
+*{ box-sizing:border-box; }
+html,body{ height:100%; }
+body{
+  margin:0;
+  background: radial-gradient(1000px 600px at 20% 10%, rgba(255,255,255,.08), transparent 55%),
+              radial-gradient(800px 500px at 80% 0%, rgba(255,255,255,.06), transparent 55%),
+              var(--bg);
+  color: var(--text);
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+.wrap{
+  min-height:100%;
+  display:grid;
+  place-items:center;
+  padding: 22px 14px;
+}
+
+.card{
+  width: min(560px, 100%);
+  background: linear-gradient(180deg, var(--card), var(--card2));
+  border: 1px solid var(--stroke);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow:hidden;
+}
+
+.hero{
+  padding: 22px 20px 16px;
+}
+
+.pill{
+  display:inline-block;
+  font-size: 12px;
+  letter-spacing:.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border: 1px solid var(--stroke);
+  border-radius: 999px;
+  padding: 8px 12px;
+}
+
+.title{
+  margin: 12px 0 18px;
+  font-family: Fraunces, serif;
+  font-weight: 600;
+  font-size: 28px;
+  line-height: 1.15;
+}
+.soft{ color: var(--muted); font-weight: 400; display:block; margin-top:6px; }
+
+.names{
+  display:flex;
+  align-items:baseline;
+  justify-content:center;
+  gap: 10px;
+  padding: 10px 12px 2px;
+}
+.big{
+  font-family: Fraunces, serif;
+  font-size: 34px;
+  letter-spacing:.01em;
+}
+.amp{ color: var(--faint); font-size: 18px; }
+
+.details{
+  margin-top: 14px;
+  display:grid;
+  gap: 10px;
+}
+.detail{
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+  padding: 12px 12px;
+  border: 1px solid var(--stroke);
+  border-radius: 16px;
+}
+.k{ color: var(--muted); font-size: 12px; letter-spacing:.06em; text-transform: uppercase; }
+.v{ font-weight: 500; color: var(--text); text-align:right; }
+
+.note{
+  margin: 14px 2px 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.rsvp{
+  padding: 16px 20px 22px;
+  border-top: 1px solid var(--stroke);
+}
+
+.h2{
+  margin: 0;
+  font-family: Fraunces, serif;
+  font-size: 22px;
+  letter-spacing:.01em;
+}
+.sub{
+  margin: 8px 0 16px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.choiceRow{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.btn{
+  border: 1px solid var(--stroke);
+  background: rgba(255,255,255,.05);
+  color: var(--text);
+  padding: 12px 12px;
+  border-radius: 16px;
+  font-weight: 600;
+  cursor:pointer;
+  transition: transform .05s ease, background .2s ease, border-color .2s ease;
+  touch-action: manipulation;
+}
+.btn:active{ transform: scale(.99); }
+.btn:hover{ background: rgba(255,255,255,.08); }
+
+.btn.selected{
+  border-color: rgba(255,255,255,.28);
+  background: rgba(255,255,255,.12);
+}
+
+.paxRow{
+  margin: 10px 0 12px;
+  display:none;
+}
+.paxRow.show{ display:block; }
+
+.label{
+  display:block;
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0 0 6px;
+}
+
+.select, .textarea{
+  width:100%;
+  border-radius: 16px;
+  border: 1px solid var(--stroke);
+  background: rgba(0,0,0,.18);
+  color: var(--text);
+  padding: 12px 12px;
+  font-size: 14px;
+  outline:none;
+}
+.textarea{ resize: vertical; }
+
+.actions{
+  display:flex;
+  flex-direction:column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.btn.primary{
+  background: rgba(255,255,255,.16);
+  border-color: rgba(255,255,255,.22);
+}
+.btn.primary:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+}
+.tiny{
+  font-size: 12px;
+  color: var(--faint);
+}
+
+.status{
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--muted);
+  min-height: 18px;
+}
+
+.hidden{ display:none; }
+
+.footer{
+  padding: 14px 20px 18px;
+  border-top: 1px solid var(--stroke);
+  color: var(--faint);
+  font-size: 12px;
+}
+code{ color: rgba(255,255,255,.75); }
