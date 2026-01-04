@@ -1,7 +1,7 @@
 (function () {
 
   /* ========= CONFIG ========= */
-  const SCRIPT_URL = "PASTE_YOUR_GOOGLE_SCRIPT_URL_HERE";
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzLxkehFz79asOtvTecgQYWrnwn6t8gU9I7T3QniU1GqmV1RJ216x8fH_rwm19-pPZyMw/exec";
 
   /* ========= HELPERS ========= */
   const $ = (id) => document.getElementById(id);
