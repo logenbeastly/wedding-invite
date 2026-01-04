@@ -1,7 +1,6 @@
 (function () {
-
   /* ========= CONFIG ========= */
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzLxkehFz79asOtvTecgQYWrnwn6t8gU9I7T3QniU1GqmV1RJ216x8fH_rwm19-pPZyMw/exec"; // must end with /exec
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzLxkehFz79asOtvTecgQYWrnwn6t8gU9I7T3QniU1GqmV1RJ216x8fH_rwm19-pPZyMw/exec";
 
   /* ========= HELPERS ========= */
   const $ = (id) => document.getElementById(id);
@@ -34,7 +33,7 @@
 
   function clearPax() {
     paxField.value = "";
-    paxChips.forEach(c => c.classList.remove("selected"));
+    paxChips.forEach((c) => c.classList.remove("selected"));
   }
 
   function setHint(text) {
@@ -43,7 +42,6 @@
 
   function setResponse(val) {
     responseField.value = val;
-
     yesBtn.classList.toggle("selected", val === "YES");
     noBtn.classList.toggle("selected", val === "NO");
 
@@ -62,10 +60,10 @@
   yesBtn.addEventListener("click", () => setResponse("YES"));
   noBtn.addEventListener("click", () => setResponse("NO"));
 
-  paxChips.forEach(chip => {
+  paxChips.forEach((chip) => {
     chip.addEventListener("click", () => {
       if (responseField.value !== "YES") setResponse("YES");
-      paxChips.forEach(c => c.classList.remove("selected"));
+      paxChips.forEach((c) => c.classList.remove("selected"));
       chip.classList.add("selected");
       paxField.value = chip.dataset.pax || "";
       submitBtn.disabled = false;
@@ -76,7 +74,7 @@
   submitBtn.disabled = true;
   setHint("Choose Yes or No first.");
 
-  /* ========= SUBMIT (CORS-safe: x-www-form-urlencoded) ========= */
+  /* ========= SUBMIT ========= */
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -94,42 +92,51 @@
     submitBtn.disabled = true;
     status.textContent = "Submitting…";
 
+    // Build x-www-form-urlencoded body WITHOUT setting headers (avoids preflight)
     const payload = new URLSearchParams();
     payload.set("guest_name", guestNameField.value || "");
     payload.set("response", responseField.value || "");
     payload.set("pax", paxField.value || "");
     payload.set("message", (messageEl && messageEl.value) ? messageEl.value : "");
 
+    const bodyStr = payload.toString();
+
+    // 1) Best: sendBeacon (no CORS readback, but very reliable)
+    let sent = false;
     try {
-      const res = await fetch(SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
-        body: payload.toString(),
-        redirect: "follow"
-      });
-
-      // Apps Script can return plain text; handle both JSON and text
-      const text = await res.text();
-      let json = null;
-      try { json = JSON.parse(text); } catch {}
-
-      if (res.ok && (json?.success === true || text.trim() === "OK" || text.trim() === "")) {
-        status.textContent = "Thank you! RSVP received 🥂";
-        setHint("You may close this page.");
-
-        yesBtn.disabled = true;
-        noBtn.disabled = true;
-        paxChips.forEach(c => c.disabled = true);
-        if (messageEl) messageEl.disabled = true;
-      } else {
-        status.textContent = "Submission failed. " + (json?.error ? json.error : "");
-        submitBtn.disabled = false;
+      if (navigator.sendBeacon) {
+        const blob = new Blob([bodyStr], { type: "application/x-www-form-urlencoded" });
+        sent = navigator.sendBeacon(SCRIPT_URL, blob);
       }
-    } catch (err) {
-      console.error(err);
-      status.textContent = "Network/CORS error. Please try again.";
+    } catch (_) {
+      sent = false;
+    }
+
+    // 2) Fallback: fetch with no-cors (also no readback)
+    if (!sent) {
+      try {
+        await fetch(SCRIPT_URL, {
+          method: "POST",
+          mode: "no-cors",
+          body: payload
+        });
+        sent = true;
+      } catch (_) {
+        sent = false;
+      }
+    }
+
+    if (sent) {
+      status.textContent = "Thank you! RSVP received 🥂";
+      setHint("You may close this page.");
+
+      yesBtn.disabled = true;
+      noBtn.disabled = true;
+      paxChips.forEach((c) => (c.disabled = true));
+      if (messageEl) messageEl.disabled = true;
+    } else {
+      status.textContent = "Unable to submit. Please try again.";
       submitBtn.disabled = false;
     }
   });
-
 })();
