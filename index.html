@@ -5,45 +5,61 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Wedding Invitation</title>
   <meta name="description" content="Wedding invitation and RSVP" />
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="./style.css" />
 </head>
 
 <body>
   <main class="wrap">
     <section class="card">
+
       <header class="hero">
         <div class="pill">You're invited!</div>
+
         <h1 class="title">
           <span id="guestName">Dear Guest</span>,
           <span class="soft">we’d love to celebrate our union with you</span>
         </h1>
 
+        <!-- Floral banner -->
+        <div class="banner">
+          <div class="banner-inner">
+            <div class="banner-sub">The Wedding of</div>
+            <div class="banner-names">
+              <span id="coupleA">Novin</span>
+              <span class="banner-amp">&</span>
+              <span id="coupleB">Hui Ting</span>
+            </div>
+          </div>
+        </div>
+
         <div class="names">
-          <div class="big">Novin</div>
+          <div class="big" id="nameA">Novin</div>
           <div class="amp">&</div>
-          <div class="big">Hui Ting</div>
+          <div class="big" id="nameB">Hui Ting</div>
         </div>
 
         <div class="details">
           <div class="detail">
             <div class="k">Date</div>
-            <div class="v" id="eventDate">Saturday, 28 March 2026</div>
+            <div class="v">Saturday, 28 March 2026</div>
           </div>
           <div class="detail">
             <div class="k">Time</div>
-            <div class="v" id="eventTime">9:00AM till 12:00AM</div>
+            <div class="v">9:00 AM till 12:00PM</div>
           </div>
           <div class="detail">
             <div class="k">Venue</div>
-            <div class="v" id="eventVenue">The Saujana Hotel, KL</div>
+            <div class="v">The Saujana Hotel, KL</div>
           </div>
         </div>
 
-        <p class="note" id="eventNote">
-          Color code: <b>Pastel color except pink</b>. Please RSVP by <b>1 March 2026</b>.
+        <p class="note">
+          Dress code: <b>Elegant</b>. Please RSVP by <b>1 March 2026</b>.
         </p>
       </header>
 
@@ -51,40 +67,39 @@
         <h2 class="h2">RSVP</h2>
         <p class="sub">A quick tap helps us plan seating and food.</p>
 
-        <!-- Netlify Forms -->
         <form id="rsvpForm" name="rsvp" method="POST" data-netlify="true" netlify-honeypot="bot-field">
           <input type="hidden" name="form-name" value="rsvp" />
+          <input type="hidden" name="guest_name" id="guestNameField" />
+          <input type="hidden" name="response" id="responseField" />
+          <input type="hidden" name="pax" id="paxField" />
+
           <p class="hidden">
             <label>Don’t fill this out: <input name="bot-field" /></label>
           </p>
 
-          <input type="hidden" name="guest_name" id="guestNameField" value="" />
-          <input type="hidden" name="response" id="responseField" value="" />
-
-          <div class="choiceRow" role="group" aria-label="RSVP response">
-            <button type="button" class="btn yes" id="yesBtn">Yes, joyfully</button>
-            <button type="button" class="btn no" id="noBtn">No, with love</button>
+          <div class="choiceRow">
+            <button type="button" class="btn" id="yesBtn">Yes, joyfully</button>
+            <button type="button" class="btn" id="noBtn">No, with love</button>
           </div>
 
-          <div class="paxRow" id="paxRow" aria-hidden="true">
-            <label class="label" for="pax">Number of pax</label>
-            <select name="pax" id="pax" class="select" disabled>
-              <option value="" selected>Select</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
-              <option value="7">7</option>
-              <option value="8">8</option>
-            </select>
+          <!-- Pax chips -->
+          <div class="paxRow" id="paxRow">
+            <div class="label">Number of pax</div>
+            <div class="paxChips" id="paxChips">
+              <button type="button" class="chip" data-pax="1">1</button>
+              <button type="button" class="chip" data-pax="2">2</button>
+              <button type="button" class="chip" data-pax="3">3</button>
+              <button type="button" class="chip" data-pax="4">4</button>
+              <button type="button" class="chip" data-pax="5">5</button>
+              <button type="button" class="chip" data-pax="6">6</button>
+              <button type="button" class="chip" data-pax="7">7</button>
+              <button type="button" class="chip" data-pax="8">8</button>
+            </div>
           </div>
 
           <div class="msgRow">
             <label class="label" for="message">Message (optional)</label>
-            <textarea name="message" id="message" class="textarea" rows="3"
-              placeholder="Any notes for us?"></textarea>
+            <textarea name="message" id="message" class="textarea" rows="3"></textarea>
           </div>
 
           <div class="actions">
@@ -92,13 +107,14 @@
             <div class="tiny" id="hint">Choose Yes or No first.</div>
           </div>
 
-          <div class="status" id="status" aria-live="polite"></div>
+          <div class="status" id="status"></div>
         </form>
       </section>
 
       <footer class="footer">
-        <div class="tiny">Tip: share personalized links like <code>?name=Daniel%20Tan</code></div>
+        <div class="tiny">Share link like <code>?name=Daniel%20Tan</code></div>
       </footer>
+
     </section>
   </main>
 
