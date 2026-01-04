@@ -1,8 +1,7 @@
 (function () {
 
   /* ========= CONFIG ========= */
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzLxkehFz79asOtvTecgQYWrnwn6t8gU9I7T3QniU1GqmV1RJ216x8fH_rwm19-pPZyMw/exec";
-  // MUST end with /exec
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzLxkehFz79asOtvTecgQYWrnwn6t8gU9I7T3QniU1GqmV1RJ216x8fH_rwm19-pPZyMw/exec"; // must end with /exec
 
   /* ========= HELPERS ========= */
   const $ = (id) => document.getElementById(id);
@@ -66,11 +65,9 @@
   paxChips.forEach(chip => {
     chip.addEventListener("click", () => {
       if (responseField.value !== "YES") setResponse("YES");
-
       paxChips.forEach(c => c.classList.remove("selected"));
       chip.classList.add("selected");
-      paxField.value = chip.dataset.pax;
-
+      paxField.value = chip.dataset.pax || "";
       submitBtn.disabled = false;
       setHint("Ready to submit.");
     });
@@ -79,7 +76,7 @@
   submitBtn.disabled = true;
   setHint("Choose Yes or No first.");
 
-  /* ========= SUBMIT ========= */
+  /* ========= SUBMIT (CORS-safe: x-www-form-urlencoded) ========= */
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -89,7 +86,6 @@
       status.textContent = "Please choose Yes or No.";
       return;
     }
-
     if (responseField.value === "YES" && !paxField.value) {
       status.textContent = "Please select number of pax.";
       return;
@@ -98,52 +94,40 @@
     submitBtn.disabled = true;
     status.textContent = "Submitting…";
 
-    const payload = {
-      guest_name: guestNameField.value,
-      response: responseField.value,
-      pax: paxField.value,
-      message: messageEl.value
-    };
+    const payload = new URLSearchParams();
+    payload.set("guest_name", guestNameField.value || "");
+    payload.set("response", responseField.value || "");
+    payload.set("pax", paxField.value || "");
+    payload.set("message", (messageEl && messageEl.value) ? messageEl.value : "");
 
     try {
       const res = await fetch(SCRIPT_URL, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload),
+        headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+        body: payload.toString(),
         redirect: "follow"
       });
 
+      // Apps Script can return plain text; handle both JSON and text
       const text = await res.text();
+      let json = null;
+      try { json = JSON.parse(text); } catch {}
 
-      let json;
-      try {
-        json = JSON.parse(text);
-      } catch {
-        throw new Error(
-          "Server did not return JSON. Response was:\n" +
-          text.slice(0, 150)
-        );
-      }
-
-      if (json.success) {
+      if (res.ok && (json?.success === true || text.trim() === "OK" || text.trim() === "")) {
         status.textContent = "Thank you! RSVP received 🥂";
         setHint("You may close this page.");
 
         yesBtn.disabled = true;
         noBtn.disabled = true;
         paxChips.forEach(c => c.disabled = true);
-        messageEl.disabled = true;
+        if (messageEl) messageEl.disabled = true;
       } else {
-        status.textContent = "Submission failed: " + (json.error || "Unknown error");
+        status.textContent = "Submission failed. " + (json?.error ? json.error : "");
         submitBtn.disabled = false;
       }
-
     } catch (err) {
       console.error(err);
-      status.textContent =
-        "Unable to submit RSVP. Please check connection or try again later.";
+      status.textContent = "Network/CORS error. Please try again.";
       submitBtn.disabled = false;
     }
   });
