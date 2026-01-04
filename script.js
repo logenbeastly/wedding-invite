@@ -1,7 +1,7 @@
 (function () {
-  /* ========= CONFIG (optional) =========
-     Leave as-is if you prefer editing names in HTML.
-     If you change here, it will overwrite #coupleA/#coupleB text.
+  /* ========= CONFIG =========
+     Edit these if you want JS to control the banner names.
+     If you prefer editing in HTML only, set these to "" and the script will not overwrite.
   */
   const coupleA = "Novin";
   const coupleB = "Hui Ting";
@@ -18,7 +18,7 @@
   const guestName = (params.get("name") || "").trim();
   const safeName = guestName || "Dear Guest";
 
-  /* ========= ELEMENTS (match your HTML) ========= */
+  /* ========= ELEMENTS (MATCH YOUR HTML) ========= */
   const guestNameEl = $("guestName");
   const guestNameField = $("guestNameField");
   const responseField = $("responseField");
@@ -35,13 +35,13 @@
 
   const paxChips = document.querySelectorAll(".chip");
 
-  /* ========= INIT ========= */
+  /* ========= INIT TEXT ========= */
   if (guestNameEl) guestNameEl.textContent = safeName;
   if (guestNameField) guestNameField.value = safeName;
 
-  // Only set couple names if those elements exist (they do in your HTML)
-  setText("coupleA", coupleA);
-  setText("coupleB", coupleB);
+  // Only overwrite banner names if config values are non-empty
+  if (coupleA) setText("coupleA", coupleA);
+  if (coupleB) setText("coupleB", coupleB);
 
   /* ========= REQUIRED ELEMENTS CHECK ========= */
   const required = [
@@ -61,7 +61,7 @@
     return;
   }
 
-  /* ========= RSVP STATE ========= */
+  /* ========= STATE HELPERS ========= */
   function clearPax() {
     paxField.value = "";
     paxChips.forEach((c) => c.classList.remove("selected"));
@@ -90,19 +90,19 @@
     }
   }
 
-  /* ========= BIND BUTTONS ========= */
+  /* ========= BINDINGS ========= */
   yesBtn.addEventListener("click", () => setResponse("YES"));
   noBtn.addEventListener("click", () => setResponse("NO"));
 
   paxChips.forEach((chip) => {
     chip.addEventListener("click", () => {
-      // Only allow pax selection if YES is selected
-      if (responseField.value !== "YES") {
-        setResponse("YES");
-      }
+      // If user taps pax first, auto-switch to YES (better UX)
+      if (responseField.value !== "YES") setResponse("YES");
+
       paxChips.forEach((c) => c.classList.remove("selected"));
       chip.classList.add("selected");
       paxField.value = chip.dataset.pax || "";
+
       submitBtn.disabled = false;
       setHint("Ready to submit.");
     });
@@ -112,7 +112,7 @@
   submitBtn.disabled = true;
   setHint("Choose Yes or No first.");
 
-  /* ========= SUBMIT (Netlify x-www-form-urlencoded) ========= */
+  /* ========= SUBMIT (Netlify-friendly AJAX) ========= */
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -131,7 +131,7 @@
     try {
       const body = new URLSearchParams(new FormData(form)).toString();
 
-      const res = await fetch("/", {
+      const res = await fetch(form.getAttribute("action") || "/", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body
@@ -141,6 +141,7 @@
         if (status) status.textContent = "Thank you! RSVP received 🥂";
         setHint("You may close this page.");
 
+        // Lock UI
         yesBtn.disabled = true;
         noBtn.disabled = true;
         paxChips.forEach((c) => (c.disabled = true));
@@ -150,6 +151,7 @@
         submitBtn.disabled = false;
       }
     } catch (err) {
+      console.error(err);
       if (status) status.textContent = "Network error. Please try again.";
       submitBtn.disabled = false;
     }
